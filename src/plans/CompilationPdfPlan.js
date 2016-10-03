@@ -4,10 +4,10 @@ import * as fileHelper from '../lib/fileHelper';
 import connection from '../connection';
 
 class CompilationPdfPlan {
-  constructor(options) {
-    this.compilationId = options.compilationId;
-    this.progress = options.progress || function () {}; // eslint-disable-line func-names
-    this.data = options.data || {};
+  constructor(props, progress) {
+    this.compilationId = props.compilationId;
+    this.progress = progress || function () {}; // eslint-disable-line func-names
+    this.data = props;
 
     this.cleanupFiles = [];
     // stepsTotal should be the number of times this.step() is called within this.start()
@@ -100,7 +100,7 @@ class CompilationPdfPlan {
       const oldPath = email.pdf.localPath;
       const newPath = oldPath.replace(/\.pdf$/, '-paged.pdf');
       const startingPage = this.data.emailPageMap[email._id];
-      const spawn = require('child_process').spawn;
+      const spawn = require('child_process').spawn; // eslint-disable-line global-require
       const pspdftool = spawn('pspdftool', [
         `number(x=-1pt,y=-1pt,start=${startingPage},size=10)`,
         oldPath,
@@ -144,7 +144,7 @@ class CompilationPdfPlan {
       const pageFileArguments = _.map(sortedPages, (page) => { return page.pdf.localPath; });
       const emailFileArguments = _.map(sortedEmails, (email) => { return email.pdf.localPath; });
 
-      const spawn = require('child_process').spawn;
+      const spawn = require('child_process').spawn; // eslint-disable-line global-require
       const pdftk = spawn('pdftk', [
         ...pageFileArguments,
         ...emailFileArguments,

@@ -9,11 +9,11 @@ import sendLog from './sendLog';
 export function planFactory(task) {
   switch (task.props.kind) {
     case 'compilation-emails-pdf' :
-      return new CompilationEmailsPdfPlan({ compilationId: task.props.compilationId, progress: task.progress });
+      return new CompilationEmailsPdfPlan(task.props, task.progress);
     case 'compilation-pages-pdf' :
-      return new CompilationPagesPdfPlan({ compilationId: task.props.compilationId, progress: task.progress });
+      return new CompilationPagesPdfPlan(task.props, task.progress);
     case 'compilation-pdf' :
-      return new CompilationPdfPlan({ compilationId: task.props.compilationId, progress: task.progress });
+      return new CompilationPdfPlan(task.props, task.progress);
     default:
       return null;
   }
@@ -30,7 +30,7 @@ class Task {
   }
 
   progress(completed, total, data) {
-    const percent = Number((completed / total).toFixed(2)) * 100;
+    const percent = parseInt(Number((completed / total).toFixed(2)) * 100, 10);
     sendLog('progress', `${percent}% complete`, { completed, total, data });
   }
 

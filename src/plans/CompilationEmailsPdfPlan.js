@@ -5,9 +5,9 @@ import EmailPdfPlan from './EmailPdfPlan';
 import _ from 'lodash';
 
 class CompilationEmailsPdfPlan {
-  constructor(options) {
-    this.compilationId = options.compilationId;
-    this.progress = options.progress || function () {}; // eslint-disable-line func-names
+  constructor(props, progress) {
+    this.compilationId = props.compilationId;
+    this.progress = progress || function () {}; // eslint-disable-line func-names
 
     // stepsTotal should be the number of times this.step() is called within this.start()
     this.stepsTotal = 2;
