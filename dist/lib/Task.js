@@ -6,55 +6,63 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); // import _ from 'lodash';
 
+// import EmailPdfPlan from '../plans/EmailPdfPlan';
+// import PagePdfPlan from '../plans/PagePdfPlan';
+
 
 exports.planFactory = planFactory;
 
-var _EmailPdfPlan = require('../plans/EmailPdfPlan');
+var _CompilationEmailsPdfPlan = require('../plans/CompilationEmailsPdfPlan');
 
-var _EmailPdfPlan2 = _interopRequireDefault(_EmailPdfPlan);
+var _CompilationEmailsPdfPlan2 = _interopRequireDefault(_CompilationEmailsPdfPlan);
 
-var _PagePdfPlan = require('../plans/PagePdfPlan');
+var _CompilationPagesPdfPlan = require('../plans/CompilationPagesPdfPlan');
 
-var _PagePdfPlan2 = _interopRequireDefault(_PagePdfPlan);
+var _CompilationPagesPdfPlan2 = _interopRequireDefault(_CompilationPagesPdfPlan);
 
 var _CompilationPdfPlan = require('../plans/CompilationPdfPlan');
 
 var _CompilationPdfPlan2 = _interopRequireDefault(_CompilationPdfPlan);
+
+var _sendLog = require('./sendLog');
+
+var _sendLog2 = _interopRequireDefault(_sendLog);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function planFactory(task) {
-  switch (task.job.data.kind) {
-    case 'email-pdf':
-      return new _EmailPdfPlan2.default({ emailId: task.job.data.referenceId, progress: task.progress, data: task.job.data });
-    case 'page-pdf':
-      return new _PagePdfPlan2.default({ pageId: task.job.data.referenceId, progress: task.progress, data: task.job.data });
+  switch (task.props.kind) {
+    case 'compilation-emails-pdf':
+      return new _CompilationEmailsPdfPlan2.default({ compilationId: task.props.compilationId, progress: task.progress });
+    case 'compilation-pages-pdf':
+      return new _CompilationPagesPdfPlan2.default({ compilationId: task.props.compilationId, progress: task.progress });
     case 'compilation-pdf':
-      return new _CompilationPdfPlan2.default({ compilationId: task.job.data.referenceId, progress: task.progress, data: task.job.data });
+      return new _CompilationPdfPlan2.default({ compilationId: task.props.compilationId, progress: task.progress });
     default:
       return null;
   }
 }
 
 var Task = function () {
-  function Task(job) {
+  function Task(props) {
     _classCallCheck(this, Task);
 
-    this.job = job;
+    this.props = props;
     this.progress = this.progress.bind(this);
   }
 
   _createClass(Task, [{
     key: 'log',
     value: function log(entry) {
-      this.job.log(entry);
+      (0, _sendLog2.default)('update', entry);
     }
   }, {
     key: 'progress',
     value: function progress(completed, total, data) {
-      this.job.progress(completed, total, data);
+      var percent = Number((completed / total).toFixed(2)) * 100;
+      (0, _sendLog2.default)('progress', percent + '% complete', { completed: completed, total: total, data: data });
     }
   }, {
     key: 'start',

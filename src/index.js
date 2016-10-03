@@ -1,19 +1,27 @@
 require('babel-register');
 require('babel-polyfill');
-if (process.env.NODE_ENV !== 'production') { require('dotenv').config({ silent: true }); }
+if (process.env.NODE_ENV !== 'production') { require('dotenv').config({ silent: true }); } // eslint-disable-line global-require
 
 import Task from './lib/Task';
-import queue from './queue';
+import connection from './connection';
 
-const workers = process.env.WORKER_PROCESSES || 10;
+function runTask() {
+  connection((db) => {
+    const props = {
+      kind: 'compilation-pages-pdf',
+      compilationId: 'ryYp07yA',
+    };
 
-queue.process('worker', workers, (job, done) => {
-  const task = new Task(job);
-  task.start()
-  .then(() => {
-    done();
-  })
-  .catch((err) => {
-    done(err);
+    const task = new Task(props);
+
+    return task.start()
+    .then(() => {
+      db.close();
+    })
+    .catch((err) => {
+      console.log(err);
+    });
   });
-});
+}
+
+runTask();
