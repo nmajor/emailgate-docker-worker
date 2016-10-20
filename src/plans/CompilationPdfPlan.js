@@ -59,7 +59,7 @@ class CompilationPdfPlan {
     return new Promise((resolve, reject) => {
       connection((db) => {
         const collection = db.collection('pages');
-        collection.find({ _compilation: this.compilationId })
+        collection.find({ _compilation: this.compilationId, type: { $ne: 'cover' } })
         .toArray((err, docs) => { // eslint-disable-line consistent-return
           if (err) { return reject(err); }
 

@@ -102,10 +102,12 @@ export function uploadPdfObject(pdfObj) {
           updatedAt,
           path: fullPath,
           extension: results.extension,
+          lastModified: results.headers['last-modified'],
           type: results.type,
           etag: results.etag,
           md5: results.md5,
           size: results.size,
+          fileResults: results,
         });
       });
     });
