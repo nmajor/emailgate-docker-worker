@@ -32,7 +32,7 @@ class Task {
 
   progress(completed, total, data) {
     const percent = parseInt(Number((completed / total).toFixed(2)) * 100, 10);
-    sendLog('progress', `${percent}% complete`, { completed, total, data });
+    sendLog('progress', `${percent}%`, { completed, total, data });
   }
 
   start() {
