@@ -4,9 +4,10 @@ import * as fileHelper from '../lib/fileHelper';
 import connection from '../connection';
 
 class CompilationPdfPlan {
-  constructor(props, progress) {
+  constructor(props) {
     this.compilationId = props.compilationId;
-    this.progress = progress || function () {}; // eslint-disable-line func-names
+    this.progress = props.progress || function () {}; // eslint-disable-line func-names
+    this.log = props.log || function () {}; // eslint-disable-line func-names
     this.data = props;
 
     this.cleanupFiles = [];
@@ -83,6 +84,8 @@ class CompilationPdfPlan {
 
     _.forEach(this.emails, (email) => {
       p = p.then(() => {
+        this.log(`Downloading email ${email._id} pdf`);
+
         return this.step(pdfHelper.downloadPdf(email.pdf)
         .then((localPath) => {
           this.cleanupFiles.push(localPath);
@@ -96,6 +99,8 @@ class CompilationPdfPlan {
   }
 
   addPageNumberToEmail(email) {
+    this.log(`Adding page number email ${email._id}`);
+
     return this.step(new Promise((resolve, reject) => {
       const oldPath = email.pdf.localPath;
       const newPath = oldPath.replace(/\.pdf$/, '-paged.pdf');
@@ -124,6 +129,8 @@ class CompilationPdfPlan {
 
     _.forEach(this.pages, (page) => {
       p = p.then(() => {
+        this.log(`Downloading page ${page._id} pdf`);
+
         return this.step(pdfHelper.downloadPdf(page.pdf)
         .then((localPath) => {
           this.cleanupFiles.push(localPath);
@@ -171,6 +178,7 @@ class CompilationPdfPlan {
       return Promise.resolve({
         model: 'compilation',
         _id: this.compilationId,
+        modelVersion: undefined,
         pageCount,
         buffer,
       });

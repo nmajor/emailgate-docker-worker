@@ -22,11 +22,12 @@ export function planFactory(task) {
 class Task {
   constructor(props) {
     this.props = props;
-    this.progress = this.progress.bind(this);
+    this.props.progress = this.progress.bind(this);
+    this.props.log = this.log.bind(this);
   }
 
-  log(entry) {
-    sendLog('update', entry);
+  log(entry, payload) {
+    sendLog('update', entry, payload);
   }
 
   progress(completed, total, data) {

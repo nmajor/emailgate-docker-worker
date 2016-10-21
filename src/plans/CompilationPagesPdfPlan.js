@@ -5,9 +5,10 @@ import PagePdfPlan from './PagePdfPlan';
 import _ from 'lodash';
 
 class CompilationPagesPdfPlan {
-  constructor(props, progress) {
+  constructor(props) {
     this.compilationId = props.compilationId;
-    this.progress = progress || function () {}; // eslint-disable-line func-names
+    this.progress = props.progress || function () {}; // eslint-disable-line func-names
+    this.log = props.log || function () {}; // eslint-disable-line func-names
 
     // stepsTotal should be the number of times this.step() is called within this.start()
     this.stepsTotal = 2;
@@ -41,18 +42,19 @@ class CompilationPagesPdfPlan {
     this.stepsTotal += pagesCount;
   }
 
-  subProgress(completed, total, data) {
-    if (completed !== total) {
-      const fraction = Number((completed / total).toFixed(2));
-      this.progress(this.stepsCompleted + fraction, this.stepsTotal, data);
-    }
+  subProgress() {
+    return;
+    // if (completed !== total) {
+    //   const fraction = Number((completed / total).toFixed(2));
+    //   this.progress(this.stepsCompleted + fraction, this.stepsTotal, data);
+    // }
   }
   pagePdfPlans() {
     let p = Promise.resolve();
 
     _.forEach(this.pages, (page) => {
       p = p.then(() => {
-        const plan = new PagePdfPlan({ pageId: page._id, progress: this.subProgress });
+        const plan = new PagePdfPlan({ pageId: page._id, progress: this.subProgress, log: this.log });
         return this.step(plan.start());
       });
     });

@@ -65,7 +65,9 @@ export function savePdfObject(pdfObj) {
   });
 }
 
-export function uploadPdfObject(pdfObj) {
+export function uploadPdfObject(pdfObj, log) {
+  log = log || function() {}; // eslint-disable-line
+
   return new Promise((resolve, reject) => {
     const filename = pdfFilename(pdfObj);
     const path = pdfPath(pdfObj);
@@ -88,7 +90,7 @@ export function uploadPdfObject(pdfObj) {
       const updatedAt = new Date();
 
       client.info(fullPath, (err, results) => { // eslint-disable-line
-        if (err) { return reject(err); }
+        if (err) { return reject({ message: err.message, err, fullPath }); }
 
         const fileUrl = `${process.env.MANTA_APP_URL}/${fullPath}`;
 

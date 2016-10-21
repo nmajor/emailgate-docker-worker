@@ -6,6 +6,7 @@ class EmailPdfPlan {
   constructor(options) {
     this.emailId = options.emailId;
     this.progress = options.progress || function () {}; // eslint-disable-line func-names
+    this.log = options.log || function () {}; // eslint-disable-line func-names
     this.data = options.data || {};
 
     // stepsTotal should be the number of times this.step() is called within this.start()
@@ -37,13 +38,15 @@ class EmailPdfPlan {
   }
 
   buildPdf() {
+    this.log(`Building email ${this.email._id} pdf`);
     const email = this.email;
     const html = email.template.replace('[[BODY]]', email.body);
     return pdfHelper.buildPdf(html, 'email', email, config.emailOptions);
   }
 
   uploadPdf(pdfObj) {
-    return pdfHelper.uploadPdfObject(pdfObj);
+    this.log(`Uploading email ${this.email._id} pdf`);
+    return pdfHelper.uploadPdfObject(pdfObj, this.log);
   }
 
   savePdfResults(pdfResults) {

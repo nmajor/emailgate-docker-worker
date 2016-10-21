@@ -6,6 +6,7 @@ class PagePdfPlan {
   constructor(options) {
     this.pageId = options.pageId;
     this.progress = options.progress || function () {}; // eslint-disable-line func-names
+    this.log = options.log || function () {}; // eslint-disable-line func-names
     this.data = options.data || {};
 
     // stepsTotal should be the number of times this.step() is called within this.start()
@@ -37,13 +38,15 @@ class PagePdfPlan {
   }
 
   buildPdf() {
+    this.log(`Building page ${this.page._id} pdf`);
     const page = this.page;
     const html = page.html;
     return pdfHelper.buildPdf(html, 'page', page, config.pageOptions);
   }
 
   uploadPdf(pdfObj) {
-    return pdfHelper.uploadPdfObject(pdfObj);
+    this.log(`Uploading page ${this.page._id} pdf`);
+    return pdfHelper.uploadPdfObject(pdfObj, this.log);
   }
 
   savePdfResults(pdfResults) {

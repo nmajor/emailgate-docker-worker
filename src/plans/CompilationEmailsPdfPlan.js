@@ -5,9 +5,10 @@ import EmailPdfPlan from './EmailPdfPlan';
 import _ from 'lodash';
 
 class CompilationEmailsPdfPlan {
-  constructor(props, progress) {
+  constructor(props) {
     this.compilationId = props.compilationId;
-    this.progress = progress || function () {}; // eslint-disable-line func-names
+    this.progress = props.progress || function () {}; // eslint-disable-line func-names
+    this.log = props.log || function () {}; // eslint-disable-line func-names
 
     // stepsTotal should be the number of times this.step() is called within this.start()
     this.stepsTotal = 2;
@@ -40,18 +41,19 @@ class CompilationEmailsPdfPlan {
     const emailsCount = this.emails.length;
     this.stepsTotal += emailsCount;
   }
-  subProgress(completed, total, data) {
-    if (completed !== total) {
-      const fraction = Number((completed / total).toFixed(2));
-      this.progress(this.stepsCompleted + fraction, this.stepsTotal, data);
-    }
+  subProgress() {
+    return;
+    // if (completed !== total) {
+    //   const fraction = Number((completed / total).toFixed(2));
+    //   this.progress(this.stepsCompleted + fraction, this.stepsTotal, data);
+    // }
   }
   emailPdfPlans() {
     let p = Promise.resolve();
 
     _.forEach(this.emails, (email) => {
       p = p.then(() => {
-        const plan = new EmailPdfPlan({ emailId: email._id, progress: this.subProgress });
+        const plan = new EmailPdfPlan({ emailId: email._id, progress: this.subProgress, log: this.log });
         return this.step(plan.start());
       });
     });
