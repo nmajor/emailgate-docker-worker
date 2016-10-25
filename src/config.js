@@ -25,6 +25,9 @@ const config = {
     },
     timeout: 120000,
   },
+  coverOptions: {
+    timeout: 120000,
+  },
   mantaClient: manta.createClient({
     sign: manta.privateKeySigner({
       key: process.env.MANTA_APP_KEY.replace(/\\n/g, '\n'),
