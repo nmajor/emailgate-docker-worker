@@ -9,23 +9,28 @@ exports.default = function (cb) {
     cb(db);return;
   }
 
+  (0, _sendLog2.default)('status', 'MongoURL: ' + _config2.default.mongoUrl);
+
   _mongodb.MongoClient.connect(_config2.default.mongoUrl, function (err, conn) {
-    _assert2.default.equal(err, null);
+    if (err) {
+      return (0, _sendLog2.default)('error', 'There was a problem connecting to the database ' + err.message, err);
+    }
+    (0, _sendLog2.default)('status', 'Connected to db');
 
     db = conn;
-    cb(db);
+    return cb(db);
   });
 };
-
-var _assert = require('assert');
-
-var _assert2 = _interopRequireDefault(_assert);
 
 var _mongodb = require('mongodb');
 
 var _config = require('./config');
 
 var _config2 = _interopRequireDefault(_config);
+
+var _sendLog = require('./lib/sendLog');
+
+var _sendLog2 = _interopRequireDefault(_sendLog);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 

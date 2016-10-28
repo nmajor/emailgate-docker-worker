@@ -30,6 +30,7 @@ var PagePdfPlan = function () {
 
     this.pageId = options.pageId;
     this.progress = options.progress || function () {}; // eslint-disable-line func-names
+    this.log = options.log || function () {}; // eslint-disable-line func-names
     this.data = options.data || {};
 
     // stepsTotal should be the number of times this.step() is called within this.start()
@@ -71,6 +72,7 @@ var PagePdfPlan = function () {
   }, {
     key: 'buildPdf',
     value: function buildPdf() {
+      this.log('Building page ' + this.page._id + ' pdf');
       var page = this.page;
       var html = page.html;
       return pdfHelper.buildPdf(html, 'page', page, _config2.default.pageOptions);
@@ -78,7 +80,8 @@ var PagePdfPlan = function () {
   }, {
     key: 'uploadPdf',
     value: function uploadPdf(pdfObj) {
-      return pdfHelper.uploadPdfObject(pdfObj);
+      this.log('Uploading page ' + this.page._id + ' pdf');
+      return pdfHelper.uploadPdfObject(pdfObj, this.log);
     }
   }, {
     key: 'savePdfResults',

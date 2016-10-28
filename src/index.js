@@ -23,7 +23,7 @@ function runTask() {
       db.close();
     })
     .catch((err) => {
-      sendLog('error', err.message, err);
+      sendLog('error', err.message, err.stack);
     });
   });
 }

@@ -26,11 +26,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var CompilationPagesPdfPlan = function () {
-  function CompilationPagesPdfPlan(options) {
+  function CompilationPagesPdfPlan(props) {
     _classCallCheck(this, CompilationPagesPdfPlan);
 
-    this.compilationId = options.compilationId;
-    this.progress = options.progress || function () {}; // eslint-disable-line func-names
+    this.compilationId = props.compilationId;
+    this.progress = props.progress || function () {}; // eslint-disable-line func-names
+    this.log = props.log || function () {}; // eslint-disable-line func-names
 
     // stepsTotal should be the number of times this.step() is called within this.start()
     this.stepsTotal = 2;
@@ -72,11 +73,12 @@ var CompilationPagesPdfPlan = function () {
     }
   }, {
     key: 'subProgress',
-    value: function subProgress(completed, total, data) {
-      if (completed !== total) {
-        var fraction = Number((completed / total).toFixed(2));
-        this.progress(this.stepsCompleted + fraction, this.stepsTotal, data);
-      }
+    value: function subProgress() {
+      return;
+      // if (completed !== total) {
+      //   const fraction = Number((completed / total).toFixed(2));
+      //   this.progress(this.stepsCompleted + fraction, this.stepsTotal, data);
+      // }
     }
   }, {
     key: 'pagePdfPlans',
@@ -87,7 +89,7 @@ var CompilationPagesPdfPlan = function () {
 
       _lodash2.default.forEach(this.pages, function (page) {
         p = p.then(function () {
-          var plan = new _PagePdfPlan2.default({ pageId: page._id, progress: _this2.subProgress });
+          var plan = new _PagePdfPlan2.default({ pageId: page._id, progress: _this2.subProgress, log: _this2.log });
           return _this2.step(plan.start());
         });
       });

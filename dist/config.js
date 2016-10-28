@@ -39,6 +39,10 @@ var config = {
     },
     timeout: 120000
   },
+  coverOptions: {
+    timeout: 120000,
+    border: '0'
+  },
   mantaClient: _manta2.default.createClient({
     sign: _manta2.default.privateKeySigner({
       key: process.env.MANTA_APP_KEY.replace(/\\n/g, '\n'),

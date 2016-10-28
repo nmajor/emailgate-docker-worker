@@ -31,12 +31,13 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var CompilationPdfPlan = function () {
-  function CompilationPdfPlan(options) {
+  function CompilationPdfPlan(props) {
     _classCallCheck(this, CompilationPdfPlan);
 
-    this.compilationId = options.compilationId;
-    this.progress = options.progress || function () {}; // eslint-disable-line func-names
-    this.data = options.data || {};
+    this.compilationId = props.compilationId;
+    this.progress = props.progress || function () {}; // eslint-disable-line func-names
+    this.log = props.log || function () {}; // eslint-disable-line func-names
+    this.data = props;
 
     this.cleanupFiles = [];
     // stepsTotal should be the number of times this.step() is called within this.start()
@@ -98,7 +99,7 @@ var CompilationPdfPlan = function () {
       return new Promise(function (resolve, reject) {
         (0, _connection2.default)(function (db) {
           var collection = db.collection('pages');
-          collection.find({ _compilation: _this2.compilationId }).toArray(function (err, docs) {
+          collection.find({ _compilation: _this2.compilationId, type: { $ne: 'cover' } }).toArray(function (err, docs) {
             // eslint-disable-line consistent-return
             if (err) {
               return reject(err);
@@ -128,6 +129,8 @@ var CompilationPdfPlan = function () {
 
       _lodash2.default.forEach(this.emails, function (email) {
         p = p.then(function () {
+          _this3.log('Downloading email ' + email._id + ' pdf');
+
           return _this3.step(pdfHelper.downloadPdf(email.pdf).then(function (localPath) {
             _this3.cleanupFiles.push(localPath);
             email.pdf.localPath = localPath; // eslint-disable-line no-param-reassign
@@ -143,11 +146,13 @@ var CompilationPdfPlan = function () {
     value: function addPageNumberToEmail(email) {
       var _this4 = this;
 
+      this.log('Adding page number email ' + email._id);
+
       return this.step(new Promise(function (resolve, reject) {
         var oldPath = email.pdf.localPath;
         var newPath = oldPath.replace(/\.pdf$/, '-paged.pdf');
         var startingPage = _this4.data.emailPageMap[email._id];
-        var spawn = require('child_process').spawn;
+        var spawn = require('child_process').spawn; // eslint-disable-line global-require
         var pspdftool = spawn('pspdftool', ['number(x=-1pt,y=-1pt,start=' + startingPage + ',size=10)', oldPath, newPath]);
 
         pspdftool.on('close', function (code) {
@@ -170,6 +175,8 @@ var CompilationPdfPlan = function () {
 
       _lodash2.default.forEach(this.pages, function (page) {
         p = p.then(function () {
+          _this5.log('Downloading page ' + page._id + ' pdf');
+
           return _this5.step(pdfHelper.downloadPdf(page.pdf).then(function (localPath) {
             _this5.cleanupFiles.push(localPath);
             page.pdf.localPath = localPath; // eslint-disable-line no-param-reassign
@@ -200,7 +207,7 @@ var CompilationPdfPlan = function () {
           return email.pdf.localPath;
         });
 
-        var spawn = require('child_process').spawn;
+        var spawn = require('child_process').spawn; // eslint-disable-line global-require
         var pdftk = spawn('pdftk', [].concat(_toConsumableArray(pageFileArguments), _toConsumableArray(emailFileArguments), ['cat', 'output', '-']));
 
         var pdfBuffers = [];
@@ -225,6 +232,7 @@ var CompilationPdfPlan = function () {
         return Promise.resolve({
           model: 'compilation',
           _id: _this7.compilationId,
+          modelVersion: undefined,
           pageCount: pageCount,
           buffer: buffer
         });

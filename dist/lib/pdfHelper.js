@@ -103,7 +103,9 @@ function savePdfObject(pdfObj) {
   });
 }
 
-function uploadPdfObject(pdfObj) {
+function uploadPdfObject(pdfObj, log) {
+  log = log || function () {}; // eslint-disable-line
+
   return new Promise(function (resolve, reject) {
     var filename = pdfFilename(pdfObj);
     var path = pdfPath(pdfObj);
@@ -131,7 +133,7 @@ function uploadPdfObject(pdfObj) {
       client.info(fullPath, function (err, results) {
         // eslint-disable-line
         if (err) {
-          return reject(err);
+          return reject({ message: err.message, err: err, fullPath: fullPath });
         }
 
         var fileUrl = process.env.MANTA_APP_URL + '/' + fullPath;
@@ -146,10 +148,12 @@ function uploadPdfObject(pdfObj) {
           updatedAt: updatedAt,
           path: fullPath,
           extension: results.extension,
+          lastModified: results.headers['last-modified'],
           type: results.type,
           etag: results.etag,
           md5: results.md5,
-          size: results.size
+          size: results.size,
+          fileResults: results
         });
       });
     });
