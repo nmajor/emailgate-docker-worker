@@ -12,7 +12,7 @@ class CompilationPdfPlan {
 
     this.cleanupFiles = [];
     // stepsTotal should be the number of times this.step() is called within this.start()
-    this.stepsTotal = 10;
+    this.stepsTotal = 12;
     this.stepsCompleted = 0;
 
     this.getEmails = this.getEmails.bind(this);
@@ -23,6 +23,7 @@ class CompilationPdfPlan {
     this.addPageNumberToEmail = this.addPageNumberToEmail.bind(this);
     this.downloadPages = this.downloadPages.bind(this);
     this.compilePdfDocuments = this.compilePdfDocuments.bind(this);
+    this.offsetGutterMargins = this.offsetGutterMargins.bind(this);
     this.getCompilationPdfPages = this.getCompilationPdfPages.bind(this);
     this.savePdfResults = this.savePdfResults.bind(this);
     this.step = this.step.bind(this);
@@ -172,6 +173,20 @@ class CompilationPdfPlan {
     });
   }
 
+  offsetGutterMargins(pdfObj) {
+    this.log('Adding Gutter Margins');
+
+    return pdfHelper.addGutterMargins(pdfObj);
+  }
+
+  savePdfObject(pdfObj) {
+    return this.step(pdfHelper.savePdfObject(pdfObj))
+    .then((localPath) => {
+      pdfObj.localPath = localPath; // eslint-disable-line no-param-reassign
+      return Promise.resolve(pdfObj);
+    });
+  }
+
   getCompilationPdfPages(buffer) {
     return pdfHelper.getPdfPages(buffer)
     .then((pageCount) => {
@@ -233,11 +248,10 @@ class CompilationPdfPlan {
       return this.step(this.getCompilationPdfPages(buffer));
     })
     .then((pdfObj) => {
-      return this.step(pdfHelper.savePdfObject(pdfObj))
-      .then((localPath) => {
-        pdfObj.localPath = localPath; // eslint-disable-line no-param-reassign
-        return Promise.resolve(pdfObj);
-      });
+      return this.step(this.savePdfObject(pdfObj));
+    })
+    .then((pdfObj) => {
+      return this.step(this.offsetGutterMargins(pdfObj));
     })
     .then((pdfObj) => {
       return this.step(pdfHelper.uploadPdfObject(pdfObj));
@@ -247,6 +261,9 @@ class CompilationPdfPlan {
     })
     .then(() => {
       return this.step(this.cleanup());
+    })
+    .catch((err) => {
+      this.log(`blah error ${err.message}`);
     });
   }
 }

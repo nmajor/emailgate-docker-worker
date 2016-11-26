@@ -116,6 +116,34 @@ export function uploadPdfObject(pdfObj, log) {
   });
 }
 
+export function addGutterMargins(pdfObj) {
+  // pdfObj.localPath
+  // pdfjam --twoside myfile.pdf --offset '1cm 0cm' --suffix 'offset'
+  return new Promise((resolve, reject) => {
+    const suffix = 'guttered';
+    const outputFile = pdfObj.localPath.replace('.pdf', `-${suffix}.pdf`);
+    const spawn = require('child_process').spawn; // eslint-disable-line global-require
+    const pdfjam = spawn('pdfjam', [
+      '--twoside',
+      pdfObj.localPath,
+      '--offset',
+      '\'1cm 0cm\'',
+      '--outfile',
+      outputFile,
+    ]);
+
+    pdfjam.on('close', (code) => {
+      if (code === 0) {
+        pdfObj.localPath = outputFile; // eslint-disable-line no-param-reassign
+        pdfObj.buffer = fs.readFileSync(pdfObj.localPath); // eslint-disable-line no-param-reassign
+        resolve(pdfObj);
+      } else {
+        reject('pdfjam returned a bad exit code.');
+      }
+    });
+  });
+}
+
 export function downloadPdf(pdfObj) {
   return new Promise((resolve, reject) => { // eslint-disable-line consistent-return
     if (!pdfObj || !pdfObj.url) { return reject(new Error('Missing pdfObj or pdfObj.url')); }

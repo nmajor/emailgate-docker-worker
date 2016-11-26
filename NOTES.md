@@ -1,3 +1,7 @@
+http://www2.warwick.ac.uk/fac/sci/statistics/staff/academic-research/firth/software/pdfjam/
+http://manpages.ubuntu.com/manpages/precise/man1/pdfjam.1.html
+
+
 ### TODO:
 
 [DONE] Remove the status logging.

@@ -2,7 +2,7 @@ FROM node:4.4.3-slim
 # https://hub.docker.com/r/library/node/
 
 RUN apt-get update
-RUN apt-get install -y bzip2 libfontconfig pdftk
+RUN apt-get install -y bzip2 libfontconfig pdftk pdfjam
 
 # Download and install phantomjs
 WORKDIR /tmp
@@ -12,6 +12,10 @@ RUN mv phantomjs-2.1.1-linux-x86_64/bin/phantomjs /bin/
 
 # Copy pspdftool
 COPY container/pspdftool /bin/
+
+RUN apt-get install -y texlive-extra-utils
+RUN apt-get install -y texlive-latex-recommended
+RUN apt-get install -y poppler-utils
 
 # Copy over app source files
 ENV HOME /var/app
