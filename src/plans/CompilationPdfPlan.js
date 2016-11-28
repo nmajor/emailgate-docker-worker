@@ -263,7 +263,7 @@ class CompilationPdfPlan {
       return this.step(this.cleanup());
     })
     .catch((err) => {
-      this.log(`blah error ${err.message}`);
+      this.log(`blah error ${err.message}`, err);
     });
   }
 }

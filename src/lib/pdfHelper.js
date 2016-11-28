@@ -127,7 +127,7 @@ export function addGutterMargins(pdfObj) {
       '--twoside',
       pdfObj.localPath,
       '--offset',
-      '\'1cm 0cm\'',
+      `\'${config.gutterMarginOffset} 0mm\'`,
       '--outfile',
       outputFile,
     ]);

@@ -2,13 +2,15 @@ if (process.env.NODE_ENV !== 'production') { require('dotenv').config({ silent: 
 import manta from 'manta';
 
 const bleedIn = 0;
-const bindMarginIn = 0.125;
-const marginIn = 0.5;
+const gutterMarginWidthMm = 4;
+const gutterMarginOffsetMm = gutterMarginWidthMm / 2;
+const gutterMarginOffsetIn = gutterMarginOffsetMm * 0.0393701;
+const marginIn = 0.5 + gutterMarginOffsetIn;
 const heightIn = 9;
-const widthIn = 6 - bindMarginIn;
+const widthIn = 6;
 
 const bleed = `${bleedIn}in`;
-const bindMargin = `${bindMarginIn}in`;
+const gutterMarginOffset = `${gutterMarginOffsetMm}mm`;
 const margin = `${marginIn}in`;
 const height = `${heightIn}in`;
 const width = `${widthIn}in`;
@@ -16,7 +18,7 @@ const width = `${widthIn}in`;
 const config = {
   mongoUrl: process.env.MONGO_URL,
   bleed,
-  bindMargin,
+  gutterMarginOffset,
   emailOptions: {
     height,
     width,
