@@ -8,7 +8,7 @@ const gutterMarginOffsetIn = gutterMarginOffsetMm * 0.0393701;
 const leftMarginIn = 0.5 + gutterMarginOffsetIn;
 const rightMarginIn = 0.5 + gutterMarginOffsetIn;
 const topMarginIn = 0.5;
-const bottomMarginIn = 0.5 + 0.2;
+const bottomMarginIn = 0.5 + 0.4;
 const heightIn = 9;
 const widthIn = 6;
 
