@@ -1,7 +1,38 @@
 import _ from 'lodash';
+import fs from 'fs';
 import * as pdfHelper from '../lib/pdfHelper';
 import * as fileHelper from '../lib/fileHelper';
 import connection from '../connection';
+import config from '../config';
+
+const pageNumberingLatexPath = '/var/app/latex/pageNumbering.tex';
+
+// \\\\usepackage[right=0.9in,left=0.9in]{geometry}
+
+// \pdfpaperheight=11in
+// \pdfpaperwidth=8.5in
+// \\\\pdfpaperheight=PDF_HEIGHT\\\\pdfpaperwidth=PDF_WIDTH
+// \\\\usepackage[paperheight=PDF_HEIGHT,paperwidth=PDF_WIDTH]{geometry}
+// \\\\newcommand{\\\\changefont}{\\\\fontsize{14}{14}\\\\selectfont}
+// \\\\fancyfoot[CE,CO]{\\\\changefont\\\\thepage}
+
+// const latexTemplate = `\\documentclass[]{book}
+// \\usepackage{pdfpages}
+// \\usepackage{fancyhdr}
+// \\usepackage[top=0.5in, right=0.5in, bottom=1.5in, left=0.5in,]{geometry}
+// \\setlength{\\footskip}{0pt}
+// \\pagestyle{fancy}
+// \\fancyhf{}
+// \\renewcommand{\\headrulewidth}{0pt}
+//
+// \\setcounter{page}{STARTING_PAGE}
+// \\fancyfoot[FOOTER_POSITIONS]{\\thepage}
+//
+// \\begin{document}
+//
+// \\includepdf[pages=-,pagecommand=\\thispagestyle{fancy}]{PDF_PATH}
+//
+// \\end{document}`;
 
 class CompilationPdfPlan {
   constructor(props) {
@@ -66,6 +97,7 @@ class CompilationPdfPlan {
           if (err) { return reject(err); }
 
           this.pages = docs;
+          this.pagesPageCount = this.pages.map((page) => { return page.pdf.pageCount; }).reduce((a, b) => { return a + b; });
           this.addPagesProgressStepsToTotal();
           resolve(docs);
         });
@@ -99,27 +131,71 @@ class CompilationPdfPlan {
     return p;
   }
 
+  getFooterPositions() {
+    // return 'CO,CE';
+    if (this.pagesPageCount % 2 === 0) {
+      return 'LE,RO';
+    }
+    return 'LO,RE';
+  }
+
   addPageNumberToEmail(email) {
     this.log(`Adding page number email ${email._id}`);
+    const pageNumberingLatex = fs.readFileSync(pageNumberingLatexPath, 'utf8').replace('\\\\', '\\');
 
     return this.step(new Promise((resolve, reject) => {
       const oldPath = email.pdf.localPath;
-      const newPath = oldPath.replace(/\.pdf$/, '-paged.pdf');
+      const pathPieces = email.pdf.localPath.split('/');
+      const oldFileName = pathPieces.pop();
+      const newFileName = oldFileName.replace(/\.pdf$/, '-paged');
+      const oldDir = pathPieces.join('/');
+      // const newDir = '/var/host';
+      const newDir = oldDir;
       const startingPage = this.data.emailPageMap[email._id];
+      const emailLatex = pageNumberingLatex
+      .replace('STARTING_PAGE', startingPage)
+      .replace('FOOTER_POSITIONS', this.getFooterPositions(startingPage))
+      .replace('PDF_PATH', oldPath)
+      .replace('PDF_HEIGHT', config.height)
+      .replace('PDF_WIDTH', config.width)
+      .replace('LEFT_MARGIN', config.leftMargin)
+      .replace('RIGHT_MARGIN', config.rightMargin);
+
       const spawn = require('child_process').spawn; // eslint-disable-line global-require
-      const pspdftool = spawn('pspdftool', [
-        `number(x=-1pt,y=-1pt,start=${startingPage},size=10)`,
-        oldPath,
-        newPath,
+
+
+      const command = `echo "${emailLatex.replace('\\', '\\\\')}" | pdflatex -jobname="${newFileName}" -output-directory="${newDir}"`;
+      const pdflatex = spawn('/bin/bash', [
+        '-c',
+        command,
       ]);
 
-      pspdftool.on('close', (code) => {
+      // const pdflatex = spawn('pdflatex', [
+      //   `-jobname="${newFileName}"`,
+      //   `-output-directory="${newDir}"`,
+      // ]);
+
+      // pdflatex.stdin.write(emailLatex);
+      // pdflatex.stdin.end();
+
+      // pdflatex.stdout.on('data', (data) => {
+      //   console.log(`\nstdout: ${data}`);
+      // });
+      //
+      // pdflatex.stderr.on('data', (data) => {
+      //   console.log(`\nstderr: ${data}`);
+      // });
+
+      pdflatex.on('close', (code) => {
         if (code === 0) {
-          this.cleanupFiles.push(newPath);
-          email.pdf.localPath = newPath; // eslint-disable-line no-param-reassign
+          const newPath = [newDir, newFileName].join('/');
+          this.cleanupFiles.push(`${newPath}.pdf`);
+          this.cleanupFiles.push(`${newPath}.aux`);
+          this.cleanupFiles.push(`${newPath}.log`);
+          email.pdf.localPath = `${newPath}.pdf`; // eslint-disable-line no-param-reassign
           resolve(email);
         } else {
-          reject('pspdftool returned a bad exit code.');
+          reject('pdflatex returned a bad exit code.');
         }
       });
     }));

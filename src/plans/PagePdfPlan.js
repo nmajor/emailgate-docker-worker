@@ -10,15 +10,24 @@ class PagePdfPlan {
     this.data = options.data || {};
 
     // stepsTotal should be the number of times this.step() is called within this.start()
-    this.stepsTotal = 4;
+    this.stepsTotal = 5;
     this.stepsCompleted = 0;
 
+    this.needsBlankPage = this.needsBlankPage.bind(this);
     this.getPage = this.getPage.bind(this);
     this.buildPdf = this.buildPdf.bind(this);
+    this.addBlankPageIfNeeded = this.addBlankPageIfNeeded.bind(this);
     this.uploadPdf = this.uploadPdf.bind(this);
     this.savePdfResults = this.savePdfResults.bind(this);
     this.step = this.step.bind(this);
     this.start = this.start.bind(this);
+  }
+
+  needsBlankPage(pdfObj) {
+    if (this.page.type === 'title-page') { return true; }
+    if (this.page.type === 'table-of-contents' && pdfObj.pageCount % 2 !== 0) { return true; }
+
+    return false;
   }
 
   getPage() {
@@ -42,6 +51,14 @@ class PagePdfPlan {
     const page = this.page;
     const html = page.html;
     return pdfHelper.buildPdf(html, 'page', page, config.pageOptions);
+  }
+
+  addBlankPageIfNeeded(pdfObj) {
+    if (this.needsBlankPage(pdfObj)) {
+      return pdfHelper.appendBlankPage(pdfObj, this.log);
+    }
+
+    return Promise.resolve(pdfObj);
   }
 
   uploadPdf(pdfObj) {
@@ -79,6 +96,9 @@ class PagePdfPlan {
     return this.step(this.getPage())
     .then(() => {
       return this.step(this.buildPdf());
+    })
+    .then((pdfObj) => {
+      return this.step(this.addBlankPageIfNeeded(pdfObj));
     })
     .then((pdfObj) => {
       return this.step(this.uploadPdf(pdfObj));

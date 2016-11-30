@@ -6,7 +6,7 @@ var gutil = require('gulp-util');
 gulp.task('default', ['babel']);
 
 gulp.task('babel', () => {
-  return gulp.src('src/**/*')
+  return gulp.src('src/**/*.js')
     .pipe(babel({ presets: ['es2015'] }))
     .pipe(gulp.dest('dist'));
 });

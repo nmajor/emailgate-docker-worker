@@ -184,3 +184,49 @@ export function downloadPdf(pdfObj) {
     });
   });
 }
+
+export function appendBlankPage(pdfObj) {
+  const appendBlankPageLatexPath = '/var/app/latex/appendBlankPage.tex';
+
+  return savePdfObject(pdfObj)
+  .then((localPath) => { // eslint-disable-line no-shadow
+    return new Promise((resolve, reject) => {
+      const appendBlankPageLatex = fs.readFileSync(appendBlankPageLatexPath, 'utf8').replace('\\\\', '\\');
+
+      const oldPath = localPath;
+      const pathPieces = localPath.split('/');
+      const oldFileName = pathPieces.pop();
+      const newFileName = oldFileName.replace(/\.pdf$/, '-blanked.pdf');
+      const oldDir = pathPieces.join('/');
+      const newDir = oldDir;
+      const latex = appendBlankPageLatex
+      .replace('PDF_PATH', oldPath)
+      .replace('PDF_HEIGHT', config.height)
+      .replace('PDF_WIDTH', config.width);
+
+      const command = `echo "${latex.replace('\\', '\\\\')}" | pdflatex -jobname="${newFileName}" -output-directory="${newDir}"`;
+      const spawn = require('child_process').spawn; // eslint-disable-line global-require
+      const pdflatex = spawn('/bin/bash', [
+        '-c',
+        command,
+      ]);
+
+      pdflatex.on('close', (code) => {
+        if (code === 0) {
+          const newPath = [newDir, newFileName].join('/');
+          pdfObj.buffer = fs.readFileSync(`${newPath}.pdf`); // eslint-disable-line no-param-reassign
+          getPdfPages(pdfObj.buffer)
+          .then((pageCount) => {
+            pdfObj.pageCount = pageCount; // eslint-disable-line no-param-reassign
+            fs.unlinkSync(`${newPath}.pdf`);
+            fs.unlinkSync(`${newPath}.aux`);
+            fs.unlinkSync(`${newPath}.log`);
+            resolve(pdfObj);
+          });
+        } else {
+          reject('pdflatex returned a bad exit code.');
+        }
+      });
+    });
+  });
+}

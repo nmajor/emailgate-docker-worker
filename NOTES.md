@@ -2,6 +2,11 @@ http://www2.warwick.ac.uk/fac/sci/statistics/staff/academic-research/firth/softw
 http://manpages.ubuntu.com/manpages/precise/man1/pdfjam.1.html
 
 
+// const latexTemplate = '\\\\documentclass[]{book}\\\\usepackage[utf8]{inputenc}\\\\usepackage[english]{babel}\\\\usepackage{pdfpages}\\\\usepackage{fancyhdr}\\\\usepackage[right=0in,left=0in]{geometry}\\\\setlength{\\\\footskip}{95pt}\\\\pagestyle{fancy}\\\\fancyhf{}\\\\renewcommand{\\\\headrulewidth}{0pt}\\\\setcounter{page}{STARTING_PAGE}\\\\fancyfoot[FOOTER_POSITIONS]{\\\\thepage}\\\\begin{document}\\\\includepdf[pages=-,pagecommand=\\\\thispagestyle{fancy}]{PDF_PATH}\\\\end{document}'; // eslint-disable-line
+
+
+
+
 ### TODO:
 
 [DONE] Remove the status logging.
