@@ -11,7 +11,7 @@ class CompilationCoverPdfPlan {
     this.data = options.data || {};
 
     // stepsTotal should be the number of times this.step() is called within this.start()
-    this.stepsTotal = 4;
+    this.stepsTotal = 5;
     this.stepsCompleted = 0;
 
     this.getCompilation = this.getCompilation.bind(this);
@@ -48,9 +48,12 @@ class CompilationCoverPdfPlan {
     // coverOptions.height = `${cover.height}mm`;
     // coverOptions.width = `${cover.width}mm`;
 
-    const ratioModifier = 1.332;
-    const heightPx = ((cover.height * 72) / 25.4) * ratioModifier;
-    const widthPx = ((cover.width * 72) / 25.4) * ratioModifier;
+    const heightPx = cover.height;
+    const widthPx = cover.width;
+
+    // const ratioModifier = 1.332;
+    // const heightPx = ((cover.height * 72) / 25.4) * ratioModifier;
+    // const widthPx = ((cover.width * 72) / 25.4) * ratioModifier;
 
     coverOptions.height = `${heightPx}px`;
     coverOptions.width = `${widthPx}px`;
@@ -63,9 +66,7 @@ class CompilationCoverPdfPlan {
 
     return fileHelper.saveFile(localPath, pdfObj.buffer)
     .then(() => {
-      this.log('blah chomp 1');
       return new Promise((resolve, reject) => {
-        this.log('blah chomp 2');
         const spawn = require('child_process').spawn; // eslint-disable-line global-require
         const pdftk = spawn('pdftk', [
           localPath,
@@ -78,21 +79,17 @@ class CompilationCoverPdfPlan {
         const pdfBuffers = [];
         pdftk.stdout.on('data', (chunk) => { pdfBuffers.push(chunk); });
         pdftk.stdout.on('end', () => {
-          this.log('blah chomp end');
           resolve(Buffer.concat(pdfBuffers));
         });
 
         pdftk.stderr.on('data', (chunk) => {
-          this.log('blah chomp data');
           reject(chunk.toString('utf8'));
         });
       });
     })
     .then((pdfBuffer) => {
-      this.log('blah chomp after 1');
       return fileHelper.deleteFile(localPath)
       .then(() => {
-        this.log('blah chomp after 2');
         pdfObj.buffer = pdfBuffer; // eslint-disable-line no-param-reassign
         return Promise.resolve(pdfObj);
       });
