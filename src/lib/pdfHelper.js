@@ -116,21 +116,33 @@ export function uploadPdfObject(pdfObj, log) {
   });
 }
 
-export function addGutterMargins(pdfObj) {
+export function addGutterMargins(pdfObj, log) {
   // pdfObj.localPath
   // pdfjam --twoside myfile.pdf --offset '1cm 0cm' --suffix 'offset'
   return new Promise((resolve, reject) => {
     const suffix = 'guttered';
     const outputFile = pdfObj.localPath.replace('.pdf', `-${suffix}.pdf`);
     const spawn = require('child_process').spawn; // eslint-disable-line global-require
+
     const pdfjam = spawn('pdfjam', [
       '--twoside',
+      `--papersize '{${config.width},${config.height}}'`,
       pdfObj.localPath,
       '--offset',
       `\'${config.gutterMarginOffset} 0mm\'`,
       '--outfile',
       outputFile,
     ]);
+
+    log([
+      '--twoside',
+      `--papersize '{${config.width},${config.height}}'`,
+      pdfObj.localPath,
+      '--offset',
+      `\'${config.gutterMarginOffset} 0mm\'`,
+      '--outfile',
+      outputFile,
+    ].join(' '));
 
     pdfjam.on('close', (code) => {
       if (code === 0) {

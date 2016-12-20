@@ -6,33 +6,7 @@ import connection from '../connection';
 import config from '../config';
 
 const pageNumberingLatexPath = '/var/app/latex/pageNumbering.tex';
-
-// \\\\usepackage[right=0.9in,left=0.9in]{geometry}
-
-// \pdfpaperheight=11in
-// \pdfpaperwidth=8.5in
-// \\\\pdfpaperheight=PDF_HEIGHT\\\\pdfpaperwidth=PDF_WIDTH
-// \\\\usepackage[paperheight=PDF_HEIGHT,paperwidth=PDF_WIDTH]{geometry}
-// \\\\newcommand{\\\\changefont}{\\\\fontsize{14}{14}\\\\selectfont}
-// \\\\fancyfoot[CE,CO]{\\\\changefont\\\\thepage}
-
-// const latexTemplate = `\\documentclass[]{book}
-// \\usepackage{pdfpages}
-// \\usepackage{fancyhdr}
-// \\usepackage[top=0.5in, right=0.5in, bottom=1.5in, left=0.5in,]{geometry}
-// \\setlength{\\footskip}{0pt}
-// \\pagestyle{fancy}
-// \\fancyhf{}
-// \\renewcommand{\\headrulewidth}{0pt}
-//
-// \\setcounter{page}{STARTING_PAGE}
-// \\fancyfoot[FOOTER_POSITIONS]{\\thepage}
-//
-// \\begin{document}
-//
-// \\includepdf[pages=-,pagecommand=\\thispagestyle{fancy}]{PDF_PATH}
-//
-// \\end{document}`;
+const gutterMarginLatexPath = '/var/app/latex/gutterMargin.tex';
 
 class CompilationPdfPlan {
   constructor(props) {
@@ -251,8 +225,68 @@ class CompilationPdfPlan {
 
   offsetGutterMargins(pdfObj) {
     this.log('Adding Gutter Margins');
+    const gutterMarginLatex = fs.readFileSync(gutterMarginLatexPath, 'utf8').replace('\\\\', '\\');
 
-    return pdfHelper.addGutterMargins(pdfObj);
+    return this.step(new Promise((resolve, reject) => {
+      const oldPath = pdfObj.localPath;
+      const pathPieces = pdfObj.localPath.split('/');
+      const oldFileName = pathPieces.pop();
+      const newFileName = oldFileName.replace(/\.pdf$/, '-guttered');
+      const oldDir = pathPieces.join('/');
+      // const newDir = '/var/host';
+      const newDir = oldDir;
+      const gutterLatex = gutterMarginLatex
+      .replace('GUTTER_MARGIN', config.gutterMarginOffset)
+      .replace('GUTTER_MARGIN', config.gutterMarginOffset)
+      .replace('PDF_PATH', oldPath)
+      .replace('PDF_HEIGHT', config.height)
+      .replace('PDF_WIDTH', config.width);
+
+      console.log('gutterLatex blah ', gutterLatex);
+
+      const spawn = require('child_process').spawn; // eslint-disable-line global-require
+
+
+      const command = `echo "${gutterLatex.replace('\\', '\\\\')}" | pdflatex -jobname="${newFileName}" -output-directory="${newDir}"`;
+      const pdflatex = spawn('/bin/bash', [
+        '-c',
+        command,
+      ]);
+
+      // const pdflatex = spawn('pdflatex', [
+      //   `-jobname="${newFileName}"`,
+      //   `-output-directory="${newDir}"`,
+      // ]);
+
+      // pdflatex.stdin.write(emailLatex);
+      // pdflatex.stdin.end();
+
+      pdflatex.stdout.on('data', (data) => {
+        console.log(`\nstdout: ${data}`);
+      });
+
+      pdflatex.stderr.on('data', (data) => {
+        console.log(`\nstderr: ${data}`);
+      });
+
+      pdflatex.on('close', (code) => {
+        if (code === 0) {
+          const newPath = [newDir, newFileName].join('/');
+          this.cleanupFiles.push(`${newPath}.pdf`);
+          this.cleanupFiles.push(`${newPath}.aux`);
+          this.cleanupFiles.push(`${newPath}.log`);
+          pdfObj.localPath = `${newPath}.pdf`; // eslint-disable-line no-param-reassign
+          pdfObj.buffer = fs.readFileSync(pdfObj.localPath); // eslint-disable-line no-param-reassign
+          resolve(pdfObj);
+        } else {
+          reject('pdflatex returned a bad exit code.');
+        }
+      });
+    }));
+
+    // this.log('Adding Gutter Margins');
+    //
+    // return pdfHelper.addGutterMargins(pdfObj, this.log);
   }
 
   savePdfObject(pdfObj) {
