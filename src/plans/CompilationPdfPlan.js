@@ -242,11 +242,7 @@ class CompilationPdfPlan {
       .replace('PDF_HEIGHT', config.height)
       .replace('PDF_WIDTH', config.width);
 
-      console.log('gutterLatex blah ', gutterLatex);
-
       const spawn = require('child_process').spawn; // eslint-disable-line global-require
-
-
       const command = `echo "${gutterLatex.replace('\\', '\\\\')}" | pdflatex -jobname="${newFileName}" -output-directory="${newDir}"`;
       const pdflatex = spawn('/bin/bash', [
         '-c',
@@ -261,13 +257,13 @@ class CompilationPdfPlan {
       // pdflatex.stdin.write(emailLatex);
       // pdflatex.stdin.end();
 
-      pdflatex.stdout.on('data', (data) => {
-        console.log(`\nstdout: ${data}`);
-      });
-
-      pdflatex.stderr.on('data', (data) => {
-        console.log(`\nstderr: ${data}`);
-      });
+      // pdflatex.stdout.on('data', (data) => {
+      //   console.log(`\nstdout: ${data}`);
+      // });
+      //
+      // pdflatex.stderr.on('data', (data) => {
+      //   console.log(`\nstderr: ${data}`);
+      // });
 
       pdflatex.on('close', (code) => {
         if (code === 0) {

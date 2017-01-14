@@ -8,7 +8,9 @@ const gutterMarginOffsetIn = gutterMarginOffsetMm * 0.0393701;
 const leftMarginIn = 0.5 + gutterMarginOffsetIn;
 const rightMarginIn = 0.5 + gutterMarginOffsetIn;
 const topMarginIn = 0.5;
-const bottomMarginIn = 0.5 + 0.4;
+// Add a second number to the bottom number to make room for the page numbers
+// But I think now the line height is sufficient
+const bottomMarginIn = 0.5 + 0.0;
 const heightIn = 9;
 const widthIn = 6;
 
