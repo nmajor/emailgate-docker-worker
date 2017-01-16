@@ -257,9 +257,9 @@ class CompilationPdfPlan {
       // pdflatex.stdin.write(emailLatex);
       // pdflatex.stdin.end();
 
-      // pdflatex.stdout.on('data', (data) => {
-      //   console.log(`\nstdout: ${data}`);
-      // });
+      pdflatex.stdout.on('data', (data) => {
+        console.log(`\nstdout: ${data}`);
+      });
       //
       // pdflatex.stderr.on('data', (data) => {
       //   console.log(`\nstderr: ${data}`);
