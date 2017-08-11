@@ -88,11 +88,12 @@ export function uploadPdfObject(pdfObj, log) {
       if (err) { return reject(err); }
 
       const updatedAt = new Date();
+      const uploadedAt = Date.now();
 
       client.info(fullPath, (err, results) => { // eslint-disable-line
         if (err) { return reject({ message: err.message, err, fullPath }); }
 
-        const fileUrl = `${process.env.MANTA_APP_URL}/${fullPath}?${updatedAt}`;
+        const fileUrl = `${process.env.MANTA_APP_URL}/${fullPath}?${uploadedAt}`;
 
         resolve({
           model: pdfObj.model,
@@ -102,6 +103,7 @@ export function uploadPdfObject(pdfObj, log) {
           pageCount: pdfObj.pageCount,
           url: fileUrl,
           updatedAt,
+          uploadedAt,
           path: fullPath,
           extension: results.extension,
           lastModified: results.headers['last-modified'],
