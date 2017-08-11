@@ -92,7 +92,7 @@ export function uploadPdfObject(pdfObj, log) {
       client.info(fullPath, (err, results) => { // eslint-disable-line
         if (err) { return reject({ message: err.message, err, fullPath }); }
 
-        const fileUrl = `${process.env.MANTA_APP_URL}/${fullPath}?updatedAt`;
+        const fileUrl = `${process.env.MANTA_APP_URL}/${fullPath}?${updatedAt}`;
 
         resolve({
           model: pdfObj.model,
