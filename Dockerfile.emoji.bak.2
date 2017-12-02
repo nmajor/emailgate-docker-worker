@@ -31,6 +31,19 @@ RUN touch ./.env
 
 RUN gulp babel
 
+RUN apt-get install unzip
+WORKDIR /tmp
+RUN mkdir -p ~/.config/fontconfig/
+COPY container/fonts.conf ~/.config/fontconfig/
+RUN wget https://noto-website.storage.googleapis.com/pkgs/NotoColorEmoji-unhinted.zip
+RUN mkdir -p /usr/local/share/fonts/truetype
+RUN unzip NotoColorEmoji-unhinted.zip -d /usr/local/share/fonts/truetype/noto
+# RUN rm /usr/local/share/fonts/truetype/noto/LICENSE_OFL.txt
+# RUN apt-get remove ttf-ancient-fonts-symbola fonts-symbola
+RUN chmod 644 /usr/local/share/fonts/truetype/noto/NotoColorEmoji.ttf
+RUN fc-cache -f -v
+RUN rm NotoColorEmoji-unhinted.zip
+
 WORKDIR $HOME
 
 CMD ["node", "dist/index.js"]

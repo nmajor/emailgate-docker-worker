@@ -31,6 +31,22 @@ RUN touch ./.env
 
 RUN gulp babel
 
+RUN apt-get install ttf-bitstream-vera
+WORKDIR /tmp
+RUN wget https://github.com/eosrei/emojione-color-font/releases/download/v1.3/EmojiOneColor-SVGinOT-Linux-1.3.tar.gz
+RUN tar zxf EmojiOneColor-SVGinOT-Linux-1.3.tar.gz
+WORKDIR EmojiOneColor-SVGinOT-Linux-1.3
+RUN ./install.sh
+
+RUN apt-get install unzip
+RUN wget https://noto-website.storage.googleapis.com/pkgs/NotoColorEmoji-unhinted.zip
+RUN unzip NotoColorEmoji-unhinted.zip -d /usr/share/fonts/truetype/noto
+RUN rm -f /usr/share/fonts/truetype/noto/LICENSE_OFL.txt
+RUN rm -f /usr/share/fonts/truetype/ancient-scripts/Symbola_hint.ttf
+RUN chmod 644 /usr/share/fonts/truetype/noto/NotoColorEmoji.ttf
+RUN fc-cache -f -v
+RUN rm NotoColorEmoji-unhinted.zip
+
 WORKDIR $HOME
 
 CMD ["node", "dist/index.js"]

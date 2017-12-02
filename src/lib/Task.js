@@ -2,7 +2,7 @@
 import CompilationEmailsPdfPlan from '../plans/CompilationEmailsPdfPlan';
 import CompilationPagesPdfPlan from '../plans/CompilationPagesPdfPlan';
 import EmailPdfPlan from '../plans/EmailPdfPlan';
-// import PagePdfPlan from '../plans/PagePdfPlan';
+import PagePdfPlan from '../plans/PagePdfPlan';
 import CompilationCoverPdfPlan from '../plans/CompilationCoverPdfPlan';
 import CompilationPdfPlan from '../plans/CompilationPdfPlan';
 import sendLog from './sendLog';
@@ -19,6 +19,8 @@ export function planFactory(task) {
       return new CompilationPdfPlan(task.props, task.progress);
     case 'email-pdf' :
       return new EmailPdfPlan({ ...task.props, progress: task.progress, log: task.log });
+    case 'page-pdf' :
+      return new PagePdfPlan({ ...task.props, progress: task.progress, log: task.log });
     default:
       return null;
   }
