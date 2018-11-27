@@ -2,6 +2,8 @@ import pdf from 'html-pdf';
 import pdfjs from 'pdfjs-dist';
 import BufferStream from './BufferStream';
 import config from '../config';
+import shortid from 'shortid';
+import sendLog from './sendLog';
 
 import https from 'https';
 import fs from 'fs';
@@ -48,6 +50,8 @@ export function pdfPath(pdfObj) {
 }
 
 export function savePdfObject(pdfObj) {
+  if (pdfObj.compilationFile) return Promise.resolve(pdfObj.compilationFile);
+
   return new Promise((resolve, reject) => {
     const dir = '/tmp/compilation';
     pdfObj.filename = pdfObj.filename || pdfFilename(pdfObj); // eslint-disable-line no-param-reassign
@@ -241,6 +245,78 @@ export function appendBlankPage(pdfObj) {
           reject('pdflatex returned a bad exit code.');
         }
       });
+    });
+  });
+}
+
+export function concatToFile(fileArguments, newFilename) {
+  return new Promise((resolve, reject) => {
+    newFilename = newFilename || `/tmp/compilation/part-${shortid.generate()}.pdf`;
+
+    sendLog('blah hey there concatToFile newFilename ' + newFilename);
+    sendLog('blah hey there concatToFile ' + [
+      'pdftk',
+      ...fileArguments,
+      'cat',
+      'output',
+      newFilename,
+    ].join(' '));
+
+    const spawn = require('child_process').spawn; // eslint-disable-line global-require
+    const pdftk = spawn('pdftk', [
+      ...fileArguments,
+      'cat',
+      'output',
+      newFilename,
+    ]);
+
+    pdftk.on('close', (code) => {
+      sendLog(`blah exit code ${code} ${newFilename}`);
+      resolve(newFilename);
+    });
+
+    pdftk.on('error', (err) => {
+      reject(err.message);
+    });
+  });
+}
+
+export function concatToBuffer(fileArguments) {
+  return new Promise((resolve, reject) => {
+    const spawn = require('child_process').spawn; // eslint-disable-line global-require
+
+    sendLog('blah hey there concatToBuffer ' + [
+      'pdftk',
+      ...fileArguments,
+      'cat',
+      'output',
+      '-',
+    ].join(' '));
+
+    const pdftk = spawn('pdftk', [
+      ...fileArguments,
+      'cat',
+      'output',
+      '-',
+    ]);
+
+    const pdfBuffers = [];
+    pdftk.stdout.on('data', (chunk) => {
+      pdfBuffers.push(chunk);
+    });
+    pdftk.stdout.on('end', () => {
+      sendLog('blah concatToBuffer stdout on end');
+      resolve(Buffer.concat(pdfBuffers));
+    });
+
+    const pdfErrBuffers = [];
+    pdftk.stderr.on('data', (chunk) => {
+      sendLog('blah concatToBuffer stderr on data');
+      pdfErrBuffers.push(chunk);
+    });
+    pdftk.stderr.on('end', () => {
+      sendLog('blah concatToBuffer stderr on end', Buffer.concat(pdfErrBuffers).toString('utf8'));
+      reject(Buffer.concat(pdfErrBuffers).toString('utf8'));
     });
   });
 }

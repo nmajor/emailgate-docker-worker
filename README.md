@@ -1,3 +1,11 @@
+# Debugging:
+
+### Rebuilding Docker Image:
+docker build -t emailgate-worker .
+
+### ssh into running container
+docker exec -i -t e5b60d711d1b /bin/bash
+
 ## gulp-es6-webpack-example
 
 docker kill emailgate-worker
@@ -5,7 +13,17 @@ docker rm emailgate-worker
 docker build -t emailgate-worker .
 docker run -t -i --env-file ./.env emailgate-worker /bin/bash
 
-docker run -t -i -v /Users/nmajor/dev/emailgate-worker/:/var/host --env-file ./.env emailgate-worker /bin/bash
+docker run -t -i -v /Users/nmajor/dev/tmp/:/var/host --env-file ./.env emailgate-worker /bin/bash
+
+docker run -t -i --env-file ./.env emailgate-worker /bin/bash
+
+
+
+### ssh into running container
+docker exec -i -t e5b60d711d1b /bin/bash
+
+### copy file from running container
+docker cp 54d2a842227b:/tmp/compilation/compilation-S1qKd-3AZ.pdf ~/tmp
 
 ### TODOs
 

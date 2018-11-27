@@ -25,6 +25,8 @@ class PagePdfPlan {
 
   needsBlankPage(pdfObj) {
     if (this.page.type === 'title-page') { return true; }
+    if (this.page.type === 'message-page' && pdfObj.pageCount % 2 !== 0) { return true; }
+    if (this.page.type === 'full-image-page') { return true; }
     if (this.page.type === 'table-of-contents' && pdfObj.pageCount % 2 !== 0) { return true; }
 
     return false;

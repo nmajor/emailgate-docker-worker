@@ -16,6 +16,7 @@ COPY container/pspdftool /bin/
 RUN apt-get install -y texlive-extra-utils
 RUN apt-get install -y texlive-latex-recommended
 RUN apt-get install -y poppler-utils
+RUN apt-get install -y fonts-arphic-uming
 
 # Copy over app source files
 ENV HOME /var/app
@@ -33,4 +34,4 @@ RUN gulp babel
 
 WORKDIR $HOME
 
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/index.js", ">/tmp/stdout.log", "2>/tmp/stderr.log"]

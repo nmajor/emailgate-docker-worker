@@ -52,6 +52,7 @@
     "manta": "^2.0.6",
     "mongodb": "^2.1.16",
     "pdfjs-dist": "^1.4.258",
-    "phantomjs-prebuilt": "^2.1.7"
+    "phantomjs-prebuilt": "^2.1.7",
+    "shortid": "^2.2.8"
   }
 }
