@@ -19,6 +19,12 @@ export function getPdfPages(buffer) {
   });
 }
 
+function stringToSha1(string) {
+  const hash = require('crypto').createHash('sha1');
+  hash.update(string);
+  return hash.digest('hex');
+}
+
 export function buildPdf(html, model, obj, options) {
   return new Promise((resolve, reject) => {
     return pdf.create(html, options).toBuffer((err, buffer) => { // eslint-disable-line consistent-return
@@ -28,6 +34,7 @@ export function buildPdf(html, model, obj, options) {
 			.then((pageCount) => {
         resolve({ // eslint-disable-line indent
           model,
+          htmlSha1: stringToSha1(html),
           _id: obj._id,
           _compilation: obj._compilation,
           modelVersion: obj.updatedAt,
@@ -100,22 +107,28 @@ export function uploadPdfObject(pdfObj, log) {
         const fileUrl = `${process.env.MANTA_APP_URL}/${fullPath}?${uploadedAt}`;
 
         resolve({
-          model: pdfObj.model,
-          _id: pdfObj._id,
-          modelVersion: pdfObj.modelVersion,
-          filename,
-          pageCount: pdfObj.pageCount,
           url: fileUrl,
-          updatedAt,
-          uploadedAt,
-          path: fullPath,
-          extension: results.extension,
-          lastModified: results.headers['last-modified'],
-          type: results.type,
-          etag: results.etag,
-          md5: results.md5,
-          size: results.size,
-          fileResults: results,
+          pageCount: pdfObj.pageCount,
+          version: 1,
+          htmlSha1: pdfObj.htmlSha1,
+          meta: {
+            model: pdfObj.model,
+            _id: pdfObj._id,
+            modelVersion: pdfObj.modelVersion,
+            filename,
+            pageCount: pdfObj.pageCount,
+            url: fileUrl,
+            updatedAt,
+            uploadedAt,
+            path: fullPath,
+            extension: results.extension,
+            lastModified: results.headers['last-modified'],
+            type: results.type,
+            etag: results.etag,
+            md5: results.md5,
+            size: results.size,
+            fileResults: results,
+          },
         });
       });
     });
