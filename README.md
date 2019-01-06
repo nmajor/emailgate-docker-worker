@@ -1,7 +1,7 @@
 # Debugging:
 
 ### Rebuilding Docker Image:
-docker build -t emailgate-worker .
+docker build -t nmajor/emailgate-docker-worker .
 
 ### ssh into running container
 docker exec -i -t e5b60d711d1b /bin/bash

@@ -172,7 +172,8 @@ export function downloadPdf(pdfObj) {
       fs.mkdirSync(dir);
     }
 
-    const localPath = `${dir}/${pdfObj.filename}`;
+    const urlFilename = pdfObj.url.substring(pdfObj.url.lastIndexOf('/') + 1);
+    const localPath = `${dir}/${pdfObj.filename || urlFilename}`;
 
     // crypto.createHash('md5').update(data).digest("hex");
 

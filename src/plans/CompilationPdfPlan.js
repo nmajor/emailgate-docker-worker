@@ -92,9 +92,9 @@ class CompilationPdfPlan {
 
     _.forEach(this.emails, (email, index) => {
       p = p.then(() => {
-        this.log(`Downloading email ${email._id} pdf ${index + 1} of ${this.emails.length}`);
+        this.log(`Downloading yoda email ${email._id} pdf ${index + 1} of ${this.emails.length}`);
 
-        return this.step(pdfHelper.downloadPdf(email.pdf)
+        return this.step(pdfHelper.downloadPdf({ ...email.pdf, filename: `email-${email._id}.pdf` })
         .then((localPath) => {
           this.cleanupFiles.push(localPath);
           email.pdf.localPath = localPath; // eslint-disable-line no-param-reassign
@@ -234,7 +234,7 @@ class CompilationPdfPlan {
       p = p.then(() => {
         this.log(`Downloading page ${page._id} pdf`);
 
-        return this.step(pdfHelper.downloadPdf(page.pdf)
+        return this.step(pdfHelper.downloadPdf({ ...page.pdf, filename: `page-${page._id}.pdf` })
         .then((localPath) => {
           this.cleanupFiles.push(localPath);
           page.pdf.localPath = localPath; // eslint-disable-line no-param-reassign
