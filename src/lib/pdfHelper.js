@@ -19,7 +19,7 @@ export function getPdfPages(buffer) {
   });
 }
 
-function stringToSha1(string) {
+export function stringToSha1(string) {
   const hash = require('crypto').createHash('sha1');
   hash.update(string);
   return hash.digest('hex');

@@ -78,13 +78,22 @@ class EmailPdfPlan {
   start() {
     return this.step(this.getEmail())
     .then(() => {
-      return this.step(this.buildPdf());
-    })
-    .then((pdfObj) => {
-      return this.step(this.uploadPdf(pdfObj));
-    })
-    .then((results) => {
-      return this.step(this.savePdfResults(results));
+      const html = this.email.template.replace('[[BODY]]', this.email.body);
+      const htmlSha1 = pdfHelper.stringToSha1(html);
+      if (this.email.pdf && this.email.pdf.htmlSha1 === htmlSha1) {
+        this.log(`Valid PDF already exists for email ${this.email._id}`);
+        this.stepsCompleted = 4;
+        this.progress(this.stepsCompleted, this.stepsTotal);
+        return Promise.resolve();
+      }
+
+      return this.step(this.buildPdf())
+      .then((pdfObj) => {
+        return this.step(this.uploadPdf(pdfObj));
+      })
+      .then((results) => {
+        return this.step(this.savePdfResults(results));
+      });
     });
   }
 }
