@@ -38,12 +38,26 @@ class CompilationPdfPlan {
   }
 
   getEmails() {
+    this.log('blah getEmails 1');
+    if (this.data.bareEmailObjs) {
+      this.emails = this.data.bareEmailObjs;
+      this.addEmailsProgressStepsToTotal();
+
+      return Promise.resolve(this.data.bareEmailObjs);
+    }
+
     return new Promise((resolve, reject) => {
+      this.log('blah getEmails 2');
       connection((db) => {
+        this.log('blah getEmails 3');
         const collection = db.collection('emails');
+        this.log(`blah getEmails 3.1 ${this.compilationId}`);
         collection.find({ _compilation: this.compilationId })
         .toArray((err, docs) => { // eslint-disable-line consistent-return
+          this.log(`blah getEmails 4 found ${(err || {}).message}`);
+          this.log(`blah getEmails 5 found ${(docs || {}).length}`);
           if (err) { return reject(err); }
+          this.log(`blah getEmails 6 found ${docs.length}`);
 
           this.emails = docs;
           this.addEmailsProgressStepsToTotal();
@@ -64,6 +78,12 @@ class CompilationPdfPlan {
   }
 
   getPages() {
+    if (this.data.barePageObjs) {
+      this.pages = this.data.barePageObjs;
+      this.pagesPageCount = this.pages.map((page) => { return page.pdf.pageCount; }).reduce((a, b) => { return a + b; });
+      return Promise.resolve(this.data.barePageObjs);
+    }
+
     return new Promise((resolve, reject) => {
       connection((db) => {
         const collection = db.collection('pages');
@@ -459,6 +479,7 @@ class CompilationPdfPlan {
   }
 
   start() {
+    this.log('blah starting');
     return Promise.all([
       this.step(this.getEmails()),
       this.step(this.getPages()),
